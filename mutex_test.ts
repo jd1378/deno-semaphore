@@ -1,5 +1,5 @@
-import { assert } from "https://deno.land/std@0.84.0/testing/asserts.ts";
-import { delay } from "https://deno.land/std@0.84.0/async/delay.ts";
+import { assert } from "./test_deps.ts";
+import { delay } from "./test_deps.ts";
 import { Mutex } from "./mod.ts";
 
 Deno.test("tasks do not overlap", async () => {

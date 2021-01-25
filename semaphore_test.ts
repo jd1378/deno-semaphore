@@ -1,8 +1,5 @@
-import {
-  assert,
-  assertEquals,
-} from "https://deno.land/std@0.84.0/testing/asserts.ts";
-import { delay } from "https://deno.land/std@0.84.0/async/delay.ts";
+import { assert, assertEquals } from "./test_deps.ts";
+import { delay } from "./test_deps.ts";
 import { Semaphore } from "./mod.ts";
 
 Deno.test("limits concurrency", async function () {
@@ -85,4 +82,33 @@ Deno.test("doing release more than once is noop", async () => {
       r();
       assert(true);
     }).catch(() => assert(false));
+});
+
+Deno.test("should not be slow", async () => {
+  var s = new Semaphore(3);
+  var values = [];
+
+  s.acquire().then((release) => {
+    values.push(1);
+    release();
+  });
+  s.acquire().then((release) => {
+    values.push(2);
+    release();
+  });
+  s.acquire().then((release) => {
+    values.push(3);
+    release();
+  });
+  s.acquire().then((release) => {
+    values.push(4);
+    release();
+  });
+  s.acquire().then((release) => {
+    values.push(5);
+    release();
+  });
+
+  await delay(0);
+  assertEquals(values.length, 5);
 });
