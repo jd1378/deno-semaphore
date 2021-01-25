@@ -19,6 +19,11 @@ export class Semaphore {
     }
   }
 
+  /** returns current scheduled tasks length */
+  get length(): number {
+    return this.tasks.length;
+  }
+
   public acquire() {
     return new Promise<() => void>((resolve) => {
       const task = () => {

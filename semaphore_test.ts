@@ -1,5 +1,4 @@
-import { assert, assertEquals } from "./test_deps.ts";
-import { delay } from "./test_deps.ts";
+import { assert, assertEquals, delay, nextTickPromise } from "./test_deps.ts";
 import { Semaphore } from "./mod.ts";
 
 Deno.test("limits concurrency", async function () {
@@ -111,4 +110,44 @@ Deno.test("should not be slow", async () => {
 
   await delay(0);
   assertEquals(values.length, 5);
+});
+
+Deno.test("should not exceed limit", async () => {
+  var s = new Semaphore(3);
+  var ran = 0;
+  var releaseHandles: (() => void)[] = [];
+
+  // 3 times
+  s.acquire().then((release) => {
+    ran++;
+    releaseHandles.push(release);
+  });
+  s.acquire().then((release) => {
+    ran++;
+    releaseHandles.push(release);
+  });
+  s.acquire().then((release) => {
+    ran++;
+    releaseHandles.push(release);
+  });
+  // 2 times
+  s.acquire().then(() => {
+    ran++;
+  });
+  s.acquire().then(() => {
+    ran++;
+  });
+
+  assertEquals(s.length, 5);
+  await nextTickPromise();
+  assertEquals(ran, 3);
+  await nextTickPromise();
+  assertEquals(ran, 3);
+  assertEquals(s.length, 2);
+
+  releaseHandles.forEach((r) => r());
+
+  await nextTickPromise();
+  assertEquals(ran, 5);
+  assertEquals(s.length, 0);
 });
