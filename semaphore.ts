@@ -36,10 +36,10 @@ export class Semaphore {
     });
   }
 
-  public async use<T>(f: () => Promise<T>) {
+  public async use<T>(fn: () => Promise<T>) {
     const release = await this.acquire();
     try {
-      const res = await f();
+      const res = await fn();
       release();
       return res;
     } catch (err) {
