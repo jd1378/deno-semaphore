@@ -1,4 +1,4 @@
-import { assert, assertEquals, delay, nextTickPromise } from "./test_deps.ts";
+import { assert, assertEquals, delay } from "./test_deps.ts";
 import { Semaphore } from "./mod.ts";
 
 Deno.test("limits concurrency", async function () {
@@ -40,18 +40,17 @@ Deno.test("use recovers from thrown exception", async function () {
   var running = 0;
   var ran = 0;
   var erred = 0;
-  var task = (i: number) =>
-    async () => {
-      assert(running <= 1);
-      running++;
-      await delay(10);
-      assert(running <= 2);
-      running--;
-      if (i === 2) {
-        throw new Error("bogus");
-      }
-      ran++;
-    };
+  var task = (i: number) => async () => {
+    assert(running <= 1);
+    running++;
+    await delay(10);
+    assert(running <= 2);
+    running--;
+    if (i === 2) {
+      throw new Error("bogus");
+    }
+    ran++;
+  };
   await s.use(task(1));
   try {
     await s.use(task(2));
@@ -139,15 +138,18 @@ Deno.test("should not exceed limit", async () => {
   });
 
   assertEquals(s.length, 5);
-  await nextTickPromise();
+  await Promise.resolve();
+  await Promise.resolve();
   assertEquals(ran, 3);
-  await nextTickPromise();
+  await Promise.resolve();
+  await Promise.resolve();
   assertEquals(ran, 3);
   assertEquals(s.length, 2);
 
   releaseHandles.forEach((r) => r());
 
-  await nextTickPromise();
+  await Promise.resolve();
+  await Promise.resolve();
   assertEquals(ran, 5);
   assertEquals(s.length, 0);
 });
