@@ -1,5 +1,3 @@
-import { nextTick } from "./deps.ts";
-
 export class Semaphore {
   private tasks: (() => void)[] = [];
   count: number;
@@ -37,7 +35,7 @@ export class Semaphore {
         });
       };
       this.tasks.push(task);
-      nextTick(this.schedule.bind(this));
+      queueMicrotask(this.schedule.bind(this));
     });
   }
 
